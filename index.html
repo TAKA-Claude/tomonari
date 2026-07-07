@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>株式会社ともなり チェックシート</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",Meiryo,sans-serif;background:#f5f6fa;color:#1e293b;font-size:15px;padding-bottom:80px;-webkit-text-size-adjust:100%}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+ 
+<div id="header" style="background:linear-gradient(135deg,#1e40af,#2563eb);color:#fff;padding:14px 16px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(37,99,235,0.3)">
+  <div style="font-size:17px;font-weight:700;letter-spacing:0.5px">📋 株式会社ともなり チェックシート</div>
+  <div style="font-size:11px;margin-top:3px;display:flex;align-items:center;justify-content:center;gap:5px">
+    <span id="statusDot" style="width:7px;height:7px;border-radius:50%;display:inline-block;background:#f87171"></span>
+    <span id="statusText">接続確認中…</span>
+  </div>
+</div>
+ 
+<!-- 選択画面 -->
+<div id="selectScreen" style="padding:20px 16px">
+  <h2 style="font-size:15px;color:#64748b;text-align:center;margin-bottom:16px;font-weight:600">確認するシートを選んでください</h2>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div onclick="openForm('before')" style="display:flex;align-items:center;gap:14px;padding:18px 16px;background:#fff;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.08);border-left:5px solid #2563eb;cursor:pointer">
+      <div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;background:#dbeafe">🌅</div>
+      <div style="flex:1"><div style="font-size:16px;font-weight:700">① 作業前確認</div><div style="font-size:12px;color:#64748b;margin-top:3px"><span data-desc="before">15項目</span> ｜ 通電・外回り・衛生チェック</div></div>
+      <div style="color:#64748b;font-size:20px">›</div>
+    </div>
+    <div onclick="openForm('chlorine')" style="display:flex;align-items:center;gap:14px;padding:18px 16px;background:#fff;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.08);border-left:5px solid #0891b2;cursor:pointer">
+      <div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;background:#cffafe">💧</div>
+      <div style="flex:1"><div style="font-size:16px;font-weight:700">② 残留塩素確認</div><div style="font-size:12px;color:#64748b;margin-top:3px">水質検査 ｜ 濃度・官能検査（色・臭い・味・濁り）</div></div>
+      <div style="color:#64748b;font-size:20px">›</div>
+    </div>
+    <div onclick="openForm('final')" style="display:flex;align-items:center;gap:14px;padding:18px 16px;background:#fff;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.08);border-left:5px solid #ea580c;cursor:pointer">
+      <div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;background:#fff7ed">🌙</div>
+      <div style="flex:1"><div style="font-size:16px;font-weight:700">③ 最終確認</div><div style="font-size:12px;color:#64748b;margin-top:3px"><span data-desc="final">28項目</span> ｜ 電源OFF・施錠・使用量記録</div></div>
+      <div style="color:#64748b;font-size:20px">›</div>
+    </div>
+    <div onclick="openForm('clean')" style="display:flex;align-items:center;gap:14px;padding:18px 16px;background:#fff;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.08);border-left:5px solid #16a34a;cursor:pointer">
+      <div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;background:#dcfce7">🧹</div>
+      <div style="flex:1"><div style="font-size:16px;font-weight:700">④ 清掃確認</div><div style="font-size:12px;color:#64748b;margin-top:3px"><span data-desc="clean">21項目</span> ｜ トイレ・廊下・厨房・加工室・休憩室</div></div>
+      <div style="color:#64748b;font-size:20px">›</div>
+    </div>
+  </div>
+  <div onclick="openList()" style="display:block;text-align:center;margin-top:20px;padding:12px;background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);font-size:14px;font-weight:600;color:#2563eb;cursor:pointer">📊 記録一覧を見る</div>
+</div>
+ 
+<!-- 入力画面 -->
+<div id="formScreen" style="display:none">
+  <div onclick="goHome()" style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff;border-bottom:1px solid #e2e8f0;cursor:pointer">
+    <span style="font-size:18px;color:#2563eb">‹</span>
+    <span style="font-size:13px;color:#2563eb;font-weight:600">シート選択に戻る</span>
+  </div>
+  <div id="formTypeBadge" style="text-align:center;padding:10px;font-size:16px;font-weight:700;letter-spacing:0.5px"></div>
+  <div id="incompleteBanner" style="margin:12px 12px 0;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;display:none;align-items:center;gap:8px"></div>
+ 
+  <div style="padding:0 12px 20px">
+    <div style="background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-top:12px;overflow:hidden">
+      <select id="staffSelect" style="width:100%;padding:12px 14px;border:none;border-bottom:1px solid #e2e8f0;font-size:15px;background:#fff;color:#1e293b;appearance:auto">
+        <option value="">👤 担当者を選択…</option>
+      </select>
+    </div>
+ 
+    <div style="background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-top:12px;overflow:hidden">
+      <div id="sheetTitle" style="padding:12px 14px;font-size:13px;font-weight:700;color:#64748b;border-bottom:1px solid #e2e8f0"></div>
+      <div id="bulkBar" style="display:flex;gap:8px;padding:10px 14px;border-bottom:1px solid #e2e8f0">
+        <button onclick="checkAll()" style="padding:6px 12px;border-radius:6px;border:1px solid #e2e8f0;font-size:12px;font-weight:600;cursor:pointer;background:#fff;color:#64748b">✓ 全てチェック</button>
+        <button onclick="uncheckAll()" style="padding:6px 12px;border-radius:6px;border:1px solid #e2e8f0;font-size:12px;font-weight:600;cursor:pointer;background:#fff;color:#64748b">✕ 全て解除</button>
+      </div>
+      <div id="checkItems"></div>
+    </div>
+ 
+    <div id="judgmentBox" style="display:none;margin:12px 12px 0;padding:12px;border-radius:10px;font-size:15px;font-weight:700;text-align:center"></div>
+ 
+    <div style="background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-top:12px;overflow:hidden">
+      <div style="padding:12px 14px;font-size:13px;font-weight:700;color:#64748b;border-bottom:1px solid #e2e8f0">💬 備考 / 修正措置</div>
+      <textarea id="remarks" style="width:100%;padding:12px 14px;border:none;font-size:14px;resize:vertical;min-height:60px;font-family:inherit;color:#1e293b" placeholder="特記事項・修正措置があれば入力…"></textarea>
+    </div>
+ 
+    <button id="submitBtn" onclick="submitCheck()" style="display:block;width:100%;margin-top:16px;padding:14px;border:none;border-radius:12px;font-size:16px;font-weight:700;color:#fff;cursor:pointer;letter-spacing:1px">送信する</button>
+  </div>
+</div>
+ 
+<!-- 一覧画面 -->
+<div id="listScreen" style="display:none">
+  <div onclick="goHome()" style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff;border-bottom:1px solid #e2e8f0;cursor:pointer">
+    <span style="font-size:18px;color:#2563eb">‹</span>
+    <span style="font-size:13px;color:#2563eb;font-weight:600">シート選択に戻る</span>
+  </div>
+  <div style="display:flex;gap:6px;padding:10px 12px;overflow-x:auto">
+    <button class="stab" data-s="before" onclick="switchSheetList('before')" style="flex-shrink:0;padding:7px 14px;border-radius:20px;font-size:13px;font-weight:600;border:2px solid #2563eb;background:#2563eb;color:#fff;cursor:pointer">🌅 作業前</button>
+    <button class="stab" data-s="chlorine" onclick="switchSheetList('chlorine')" style="flex-shrink:0;padding:7px 14px;border-radius:20px;font-size:13px;font-weight:600;border:2px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer">💧 残留塩素</button>
+    <button class="stab" data-s="final" onclick="switchSheetList('final')" style="flex-shrink:0;padding:7px 14px;border-radius:20px;font-size:13px;font-weight:600;border:2px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer">🌙 最終確認</button>
+    <button class="stab" data-s="clean" onclick="switchSheetList('clean')" style="flex-shrink:0;padding:7px 14px;border-radius:20px;font-size:13px;font-weight:600;border:2px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer">🧹 清掃</button>
+  </div>
+  <div style="display:flex;gap:8px;padding:10px 12px;align-items:center">
+    <input type="date" id="filterDate" style="flex:1;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;color:#1e293b">
+    <button onclick="loadRecords()" style="padding:8px 16px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-size:13px;font-weight:600;cursor:pointer">表示</button>
+  </div>
+  <div id="recordsList" style="padding:0 12px 20px"></div>
+</div>
+ 
+<div id="loading" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.85);align-items:center;justify-content:center;z-index:200">
+  <div style="width:36px;height:36px;border:3px solid #e2e8f0;border-top-color:#2563eb;border-radius:50%;animation:spin 0.7s linear infinite"></div>
+</div>
+<div id="toast" style="position:fixed;bottom:30px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:10px;color:#fff;font-size:14px;font-weight:600;z-index:300;opacity:0;transition:opacity 0.3s;pointer-events:none"></div>
+ 
+<script>
+var GAS_URL = "ここにGASのデプロイURLを貼り付ける";  // ★要変更
+ 
+var CHLORINE_OPTIONS = [];
+for (var v = 0.1; v <= 2.0; v = Math.round((v + 0.1) * 10) / 10) { CHLORINE_OPTIONS.push(v.toFixed(1)); }
+ 
+var COLORS = {before:"#2563eb",chlorine:"#0891b2",final:"#ea580c",clean:"#16a34a"};
+var COLORS_LIGHT = {before:"#dbeafe",chlorine:"#cffafe",final:"#fff7ed",clean:"#dcfce7"};
+var AREA_COLORS = {toilet:"#7c3aed",hallway:"#0891b2",kitchen:"#c2410c",processing:"#15803d",break:"#b45309"};
+ 
+var ITEMS = {};
+ 
+var currentSheet = "", currentSheetList = "before", staffList = [], checkState = {};
+ 
+window.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("filterDate").value = todayStr();
+  loadStaff();
+  loadItems();
+});
+ 
+function todayStr() {
+  var d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+ 
+async function loadItems() {
+  try {
+    var res = await fetch(GAS_URL + "?action=getItems");
+    var data = await res.json();
+    if (data.success && data.items) {
+      ITEMS = {};
+      if (data.items.before) ITEMS.before = data.items.before;
+      if (data.items.chlorine) ITEMS.chlorine = data.items.chlorine;
+      if (data.items.final) ITEMS.final = data.items.final;
+      if (data.items.clean) ITEMS.clean = data.items.clean;
+      // 選択画面の項目数を更新
+      var counts = {
+        before: countItems(ITEMS.before),
+        chlorine: countItems(ITEMS.chlorine),
+        final: countItems(ITEMS.final),
+        clean: countItems(ITEMS.clean)
+      };
+      var descEls = document.querySelectorAll("[data-desc]");
+      descEls.forEach(function(el) {
+        var key = el.dataset.desc;
+        if (counts[key] !== undefined) {
+          el.textContent = counts[key] + "項目";
+        }
+      });
+    }
+  } catch (e) { /* 読み込み失敗時はITEMSが空のまま */ }
+}
+ 
+function countItems(def) {
+  if (!def) return 0;
+  var c = 0;
+  def.sections.forEach(function(sec) { c += sec.items.length; });
+  return c;
+}
+ 
+function goHome() {
+  document.getElementById("selectScreen").style.display = "block";
+  document.getElementById("formScreen").style.display = "none";
+  document.getElementById("listScreen").style.display = "none";
+  window.scrollTo(0, 0);
+}
+ 
+function openForm(sheet) {
+  if (!ITEMS[sheet]) { showToast("項目を読み込み中です。少し待ってからタップしてください", "#ea580c"); return; }
+  currentSheet = sheet;
+  document.getElementById("selectScreen").style.display = "none";
+  document.getElementById("formScreen").style.display = "block";
+  document.getElementById("listScreen").style.display = "none";
+  var badge = document.getElementById("formTypeBadge");
+  badge.textContent = ITEMS[sheet].badge;
+  badge.style.color = COLORS[sheet];
+  badge.style.background = COLORS_LIGHT[sheet];
+  var btn = document.getElementById("submitBtn");
+  btn.style.background = COLORS[sheet];
+  document.getElementById("bulkBar").style.display = ITEMS[sheet].isChlorine ? "none" : "flex";
+  document.getElementById("judgmentBox").style.display = ITEMS[sheet].isChlorine ? "block" : "none";
+  if (ITEMS[sheet].isChlorine) updateJudgment();
+  initCheckState(sheet);
+  renderCheckItems(sheet);
+  window.scrollTo(0, 0);
+}
+ 
+function openList() {
+  document.getElementById("selectScreen").style.display = "none";
+  document.getElementById("formScreen").style.display = "none";
+  document.getElementById("listScreen").style.display = "block";
+  loadRecords();
+  window.scrollTo(0, 0);
+}
+ 
+function switchSheetList(sheet) {
+  currentSheetList = sheet;
+  var tabs = document.querySelectorAll(".stab");
+  var tabColors = {before:"#2563eb",chlorine:"#0891b2",final:"#ea580c",clean:"#16a34a"};
+  tabs.forEach(function(t) {
+    if (t.dataset.s === sheet) {
+      t.style.background = tabColors[sheet]; t.style.color = "#fff"; t.style.borderColor = tabColors[sheet];
+    } else {
+      t.style.background = "#fff"; t.style.color = "#64748b"; t.style.borderColor = "#e2e8f0";
+    }
+  });
+  loadRecords();
+}
+ 
+function initCheckState(sheet) {
+  checkState[sheet] = {};
+  ITEMS[sheet].sections.forEach(function(sec) {
+    sec.items.forEach(function(item) {
+      checkState[sheet][item.id] = {done:false, tantou:"", value:"", ox:""};
+    });
+  });
+}
+ 
+function renderCheckItems(sheet) {
+  var def = ITEMS[sheet];
+  var container = document.getElementById("checkItems");
+  document.getElementById("sheetTitle").textContent = def.title;
+  var html = "";
+  def.sections.forEach(function(sec) {
+    if (sec.label) {
+      html += '<div style="padding:8px 14px;font-size:12px;font-weight:700;color:#fff;background:' + AREA_COLORS[sec.area] + '">' + sec.label + '</div>';
+    }
+    sec.items.forEach(function(item) {
+      var st = checkState[sheet][item.id];
+      html += '<div style="display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid #e2e8f0;gap:10px;min-height:48px">';
+      html += '<div style="flex:1;font-size:14px;line-height:1.4">' + item.text;
+      if (item.note) html += '<span style="display:block;font-size:11px;color:#64748b;margin-top:2px">' + item.note + '</span>';
+      html += '</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0">';
+      if (item.type === "check") {
+        if (def.hasTantou) {
+          html += '<input style="width:50px;padding:4px 6px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;text-align:center;color:#1e293b" placeholder="担当" value="' + st.tantou + '" onchange="checkState[\'' + sheet + '\'][\'' + item.id + '\'].tantou=this.value">';
+        }
+        var cbStyle = st.done ? "background:#16a34a;border-color:#16a34a;color:#fff" : "background:#fff;border-color:#e2e8f0;color:transparent";
+        html += '<div onclick="toggleCheck(\'' + sheet + '\',\'' + item.id + '\')" style="width:28px;height:28px;border:2px solid;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;font-weight:700;' + cbStyle + '">✓</div>';
+      } else if (item.type === "number") {
+        html += '<input style="width:100px;padding:10px 8px;border:2px solid #e2e8f0;border-radius:8px;font-size:18px;font-weight:600;text-align:right;color:#1e293b;background:#f8fafc" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" value="' + st.value + '" onfocus="this.style.borderColor=\'#2563eb\';this.select()" onblur="this.style.borderColor=\'#e2e8f0\'" onchange="checkState[\'' + sheet + '\'][\'' + item.id + '\'].value=this.value">';
+        if (item.unit) html += '<span style="font-size:12px;color:#64748b">' + item.unit + '</span>';
+      } else if (item.type === "select") {
+        html += '<select style="padding:6px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:14px;color:#1e293b;background:#fff" onchange="checkState[\'' + sheet + '\'][\'' + item.id + '\'].value=this.value;updateJudgment()">';
+        html += '<option value="">-- 選択 --</option>';
+        CHLORINE_OPTIONS.forEach(function(v) {
+          var sel = st.value === v ? " selected" : "";
+          html += '<option value="' + v + '"' + sel + '>' + v + ' mg/L</option>';
+        });
+        html += '</select>';
+      } else if (item.type === "ox") {
+        var okS = st.ox === "○" ? "background:#dcfce7;border-color:#16a34a;color:#16a34a" : "background:#fff;border-color:#e2e8f0;color:#64748b";
+        var ngS = st.ox === "×" ? "background:#fee2e2;border-color:#dc2626;color:#dc2626" : "background:#fff;border-color:#e2e8f0;color:#64748b";
+        html += '<div onclick="setOx(\'' + sheet + '\',\'' + item.id + '\',\'○\')" style="width:36px;height:28px;border:2px solid;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;font-weight:700;margin-right:2px;' + okS + '">○</div>';
+        html += '<div onclick="setOx(\'' + sheet + '\',\'' + item.id + '\',\'×\')" style="width:36px;height:28px;border:2px solid;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;font-weight:700;' + ngS + '">×</div>';
+      }
+      html += '</div></div>';
+    });
+  });
+  container.innerHTML = html;
+  updateBanner();
+}
+ 
+function toggleCheck(sheet, id) {
+  checkState[sheet][id].done = !checkState[sheet][id].done;
+  renderCheckItems(sheet);
+}
+ 
+function setOx(sheet, id, val) {
+  checkState[sheet][id].ox = (checkState[sheet][id].ox === val) ? "" : val;
+  renderCheckItems(sheet);
+  if (ITEMS[sheet].isChlorine) updateJudgment();
+}
+ 
+function checkAll() {
+  ITEMS[currentSheet].sections.forEach(function(sec) {
+    sec.items.forEach(function(item) { if (item.type === "check") checkState[currentSheet][item.id].done = true; });
+  });
+  renderCheckItems(currentSheet);
+}
+ 
+function uncheckAll() {
+  ITEMS[currentSheet].sections.forEach(function(sec) {
+    sec.items.forEach(function(item) { if (item.type === "check") checkState[currentSheet][item.id].done = false; });
+  });
+  renderCheckItems(currentSheet);
+}
+ 
+function updateBanner() {
+  var banner = document.getElementById("incompleteBanner");
+  if (!currentSheet || ITEMS[currentSheet].isChlorine) { banner.style.display = "none"; return; }
+  var total = 0, done = 0;
+  ITEMS[currentSheet].sections.forEach(function(sec) {
+    sec.items.forEach(function(item) {
+      if (item.type === "check") { total++; if (checkState[currentSheet][item.id].done) done++; }
+    });
+  });
+  if (done === total) {
+    banner.style.display = "flex"; banner.style.background = "#dcfce7"; banner.style.color = "#16a34a";
+    banner.textContent = "✅ 全 " + total + " 項目チェック完了！";
+  } else {
+    banner.style.display = "flex"; banner.style.background = "#fee2e2"; banner.style.color = "#dc2626";
+    banner.textContent = "⚠️ " + (total - done) + " 項目が未チェック（" + done + "/" + total + "）";
+  }
+}
+ 
+function updateJudgment() {
+  var box = document.getElementById("judgmentBox");
+  if (!checkState.chlorine) return;
+  var concVal = checkState.chlorine.cl01.value;
+  var oxIds = ["cl02","cl03","cl04","cl05"];
+  var allFilled = concVal && oxIds.every(function(id) { return checkState.chlorine[id].ox !== ""; });
+  if (!allFilled) {
+    box.style.background = "#f1f5f9"; box.style.color = "#64748b"; box.textContent = "💧 全項目を入力すると判定が表示されます";
+    return;
+  }
+  var conc = parseFloat(concVal);
+  var hasNg = oxIds.some(function(id) { return checkState.chlorine[id].ox === "×"; });
+  var outOfRange = conc < 0.1 || conc > 1.0;
+  if (!outOfRange && !hasNg) {
+    box.style.background = "#dcfce7"; box.style.color = "#16a34a"; box.textContent = "✅ 判定：適合（" + concVal + " mg/L）";
+  } else {
+    box.style.background = "#fee2e2"; box.style.color = "#dc2626";
+    var r = []; if (outOfRange) r.push("濃度が基準外"); if (hasNg) r.push("官能検査に×あり");
+    box.textContent = "❌ 判定：不適合（" + r.join("・") + "）｜ 上長へ報告してください";
+  }
+}
+ 
+async function loadStaff() {
+  try {
+    var res = await fetch(GAS_URL + "?action=getStaff");
+    var data = await res.json();
+    if (data.success) {
+      staffList = data.staff;
+      var sel = document.getElementById("staffSelect");
+      sel.innerHTML = '<option value="">👤 担当者を選択…</option>';
+      staffList.forEach(function(s) { sel.innerHTML += '<option value="' + s + '">' + s + '</option>'; });
+      document.getElementById("statusDot").style.background = "#4ade80";
+      document.getElementById("statusText").textContent = "スプシ連携中";
+    }
+  } catch (e) {
+    document.getElementById("statusDot").style.background = "#f87171";
+    document.getElementById("statusText").textContent = "未接続";
+  }
+}
+ 
+async function submitCheck() {
+  var staff = document.getElementById("staffSelect").value;
+  if (!staff) { showToast("担当者を選択してください", "#dc2626"); return; }
+  var map = {before:"作業前",chlorine:"残留塩素",final:"最終確認",clean:"清掃"};
+  var def = ITEMS[currentSheet]; var items = [];
+  def.sections.forEach(function(sec) {
+    sec.items.forEach(function(item) {
+      var st = checkState[currentSheet][item.id];
+      items.push({label:item.text, type:item.type, done:st.done, tantou:st.tantou, value:st.value, ox:st.ox});
+    });
+  });
+  if (def.isChlorine) {
+    if (!checkState.chlorine.cl01.value) { showToast("残留塩素濃度を選択してください", "#dc2626"); return; }
+    var oxIds = ["cl02","cl03","cl04","cl05"];
+    if (oxIds.some(function(id) { return !checkState.chlorine[id].ox; })) { showToast("官能検査を全て選択してください", "#dc2626"); return; }
+    var conc = parseFloat(checkState.chlorine.cl01.value);
+    var allOx = oxIds.every(function(id) { return checkState.chlorine[id].ox === "○"; });
+    items.push({label:"判定", type:"text", value:(conc >= 0.1 && conc <= 1.0 && allOx) ? "適合" : "不適合"});
+  } else {
+    var unc = items.filter(function(i) { return i.type === "check" && !i.done; }).length;
+    if (unc > 0 && !confirm(unc + "件が未チェックです。このまま送信しますか？")) return;
+  }
+  showLoading(true);
+  try {
+    var res = await fetch(GAS_URL, {method:"POST", body:JSON.stringify({action:"submitCheck",sheetType:map[currentSheet],staffName:staff,items:items,remarks:document.getElementById("remarks").value})});
+    var data = await res.json();
+    if (data.success) {
+      showToast(data.message, "#16a34a");
+      initCheckState(currentSheet); renderCheckItems(currentSheet);
+      document.getElementById("remarks").value = "";
+      if (def.isChlorine) updateJudgment();
+    } else { showToast("エラー: " + data.error, "#dc2626"); }
+  } catch (e) { showToast("通信エラー", "#dc2626"); }
+  showLoading(false);
+}
+ 
+async function loadRecords() {
+  var map = {before:"作業前",chlorine:"残留塩素",final:"最終確認",clean:"清掃"};
+  var dateVal = document.getElementById("filterDate").value;
+  var container = document.getElementById("recordsList");
+  showLoading(true);
+  try {
+    var url = GAS_URL + "?action=getRecords&sheetType=" + encodeURIComponent(map[currentSheetList]) + "&date=" + dateVal;
+    var res = await fetch(url); var data = await res.json();
+    if (!data.success || data.records.length === 0) { container.innerHTML = '<div style="text-align:center;padding:40px 20px;color:#64748b;font-size:14px">📭 記録がありません</div>'; showLoading(false); return; }
+    var html = "";
+    data.records.forEach(function(rec) {
+      var row = rec.data;
+      html += '<div style="background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin:10px 0;overflow:hidden">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f5f6fa;border-bottom:1px solid #e2e8f0">';
+      html += '<div><span style="font-size:13px;font-weight:600">' + (row[0]||"") + '</span><br><span style="font-size:12px;color:#64748b">👤 ' + (row[1]||"") + '</span></div>';
+      html += '<button onclick="deleteRecord(' + rec.rowIndex + ')" style="padding:4px 10px;border:1px solid #dc2626;border-radius:6px;background:none;color:#dc2626;font-size:11px;cursor:pointer">削除</button>';
+      html += '</div><div style="padding:8px 14px">';
+      for (var i = 3; i < data.headers.length; i++) {
+        var h = data.headers[i]; var v = row[i] || "";
+        if (!h || h === "備考") continue;
+        var vc = v === "✓" || v === "○" || v === "適合" ? "#16a34a" : v === "×" || v === "不適合" ? "#dc2626" : v === "" ? "#dc2626" : "#1e293b";
+        var dv = v === "" ? "—" : v;
+        html += '<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px;border-bottom:1px solid #f1f5f9"><span style="color:#64748b;flex:1">' + h + '</span><span style="font-weight:600;text-align:right;color:' + vc + '">' + dv + '</span></div>';
+      }
+      var ri = data.headers.indexOf("備考");
+      if (ri >= 0 && row[ri]) html += '<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:#64748b;flex:1">備考</span><span style="font-weight:600">' + row[ri] + '</span></div>';
+      html += '</div></div>';
+    });
+    container.innerHTML = html;
+  } catch (e) { container.innerHTML = '<div style="text-align:center;padding:40px 20px;color:#64748b">⚠️ 読み込みエラー</div>'; }
+  showLoading(false);
+}
+ 
+async function deleteRecord(rowIndex) {
+  if (!confirm("この記録を削除しますか？")) return;
+  var map = {before:"作業前",chlorine:"残留塩素",final:"最終確認",clean:"清掃"};
+  showLoading(true);
+  try {
+    var res = await fetch(GAS_URL, {method:"POST", body:JSON.stringify({action:"deleteRecord",sheetType:map[currentSheetList],rowIndex:rowIndex})});
+    var data = await res.json();
+    if (data.success) { showToast("削除しました", "#16a34a"); loadRecords(); }
+    else { showToast("エラー: " + data.error, "#dc2626"); }
+  } catch (e) { showToast("通信エラー", "#dc2626"); }
+  showLoading(false);
+}
+ 
+function showLoading(show) { document.getElementById("loading").style.display = show ? "flex" : "none"; }
+function showToast(msg, color) {
+  var t = document.getElementById("toast"); t.textContent = msg; t.style.background = color; t.style.opacity = "1";
+  setTimeout(function() { t.style.opacity = "0"; }, 2500);
+}
+</script>
+</body>
+</html>
