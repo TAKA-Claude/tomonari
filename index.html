@@ -143,7 +143,6 @@ async function loadItems() {
       if (data.items.chlorine) ITEMS.chlorine = data.items.chlorine;
       if (data.items.final) ITEMS.final = data.items.final;
       if (data.items.clean) ITEMS.clean = data.items.clean;
-      // 選択画面の項目数を更新
       var counts = {
         before: countItems(ITEMS.before),
         chlorine: countItems(ITEMS.chlorine),
@@ -158,7 +157,7 @@ async function loadItems() {
         }
       });
     }
-  } catch (e) { /* 読み込み失敗時はITEMSが空のまま */ }
+  } catch (e) { }
 }
  
 function countItems(def) {
